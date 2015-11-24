@@ -64,9 +64,9 @@ def extractMembers(source, output, stats):
 
 
 def display_help(error=False, exception=''):
-    print '''Essbase Member Extract
-Usage: python exportMembers.py -f <essbase extract file>
- -f, --file     Essbase extract file
+    print '''Parse Essbase Extract Members
+Usage: python essbase-dataextract-parse-members.py -f <essbase extract file>
+ -f, --file     Essbase extract file (required)
  -o, --output   Output file
 
 Flags:

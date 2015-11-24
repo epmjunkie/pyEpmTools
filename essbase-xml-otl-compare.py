@@ -158,9 +158,9 @@ def getAlias(nodes):
 
 def display_help(error=False, exception=''):
     print '''XML Outline Compare
-Usage: python compare.py -s <source XML file> -t <target XML file>
- -s, --source   Source XML File
- -t, --target   Target XML File
+Usage: python essbase-xml-otl-compare.py -s <source XML file> -t <target XML file>
+ -s, --source   Source XML File (required)
+ -t, --target   Target XML File (required)
  -o, --output   Output File
 
 Flags:

@@ -61,9 +61,11 @@ def buildmap(map, delimiter):
 
 
 def display_help(error=False, exception=''):
-    print '''Essbase Member Extract
-Usage: python exportMembers.py -f <essbase extract file>
- -f, --file     Essbase extract file
+    print '''Bulk Replace
+Usage: python bulkreplace.py -f <source file> -m <mapping file>
+ -f, --file     Source file (required)
+ -m, --map      Mapping file for replacements (required)
+ -d, --delim    Delimiter used to separate source and target in map
 
 Flags:
  -h             This Help
