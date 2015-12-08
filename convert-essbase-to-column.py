@@ -1,4 +1,10 @@
-__author__ = 'kiktak'
+__author__ = 'Keith Kikta'
+__copyright__ = "Copyright 2015, EPM Junkie"
+__license__ = "BSD"
+__version__ = "1.0"
+__maintainer__ = "Keith Kikta"
+__email__ = "kkikta@gmail.com"
+__status__ = "Alpha"
 
 
 import sys
@@ -11,9 +17,10 @@ from getopt import getopt, GetoptError
 def main(argv):
     outline = ''
     source = ''
+    output = ''
     opts = None
     try:
-        opts, args = getopt(argv, "ho:d", ["outline=", "data="])
+        opts, args = getopt(argv, "ho:d:f:", ["outline=", "data=", "file="])
     except GetoptError:
         pass
     except Exception as e:
@@ -26,39 +33,55 @@ def main(argv):
             outline = arg
         elif opt in ("-d", "--data"):                      # set the name of the output file
             source = arg
+        elif opt in ("-f", "--file"):
+            output = arg
     if len(source) == 0 or len(outline) == 0:         # check to make sure required parameters are defined (input and output file)
         display_help(True)
-    transform(outline, source)
+    transform(outline, source, output)
 
 
-def transform(outline, source):
+def transform(outline, source, output):
     dims, members = parseoutline(outline)
-    writeoutput(source, dims, members)
+    writeoutput(source, dims, members, output)
 
 
-def writeoutput(data, dimension, member):
+def writeoutput(data, dimension, member, output):
     mpat = re.compile(r'"(?P<member>[^"]*)"')
     dpat = re.compile(r'\s(?P<data>\-?\d*\.?\d*)')
     dimension.pop('Measure', None)
     accounts = []
+    w = ''
+    if len(output):
+        w = open(output, 'w', 10240)
     with open(data, 'r') as f:
         for line in f:
             isAccount = False
             i = 0
-            for item in shlex.split(line):
-                item = item.strip('"')
-                if not isnumeric(item):
-                    if item in member:
-                        if member[item] == 'Measure':
+            for item in shlex.split(line, posix=False):
+                if item.strip() == '#Mi':
+                    i += 1
+                elif not isnumeric(item):
+                    value = item.strip('"')
+                    if value in member:
+                        if member[value] == 'Measure':
                             if not isAccount:
                                 isAccount = True
                                 del accounts[:]
-                            accounts.append(item)
+                            accounts.append(value)
                         else:
-                            dimension[member[item]] = item
+                            dimension[member[value]] = value
                 else:
-                    print '\t'.join([''.join(value) for key, value in dimension.items()]) + '\t' + accounts[i] + '\t' + item
-                    i += 1
+                    try:
+                        if len(output):
+                            w.write('\t'.join([''.join(value) for key, value in dimension.items()]) + '\t' + accounts[i] + '\t' + item + '\n')
+                        else:
+                            print '\t'.join([''.join(value) for key, value in dimension.items()]) + '\t' + accounts[i] + '\t' + item
+                        i += 1
+                    except:
+                        print 'Error: [' + item + ']  - ' + line
+                        raise
+    if len(output):
+        w.close()
 
 def isnumeric(s):
     '''Returns True for all non-unicode numbers'''
@@ -66,7 +89,6 @@ def isnumeric(s):
         s = s.decode('utf-8')
     except:
         return False
-
     try:
         float(s)
         return True
@@ -103,14 +125,12 @@ def dig(nodes, dim):
 
 
 def display_help(error=False, exception=''):
-    print '''XML Outline Compare
-Usage: python essbase-xml-otl-compare.py -s <source XML file> -t <target XML file>
- -s, --source   Source XML File (required)
- -t, --target   Target XML File (required)
- -o, --output   Output File
+    print '''Convert Essbase Extract to Column Format (ASO)
+Usage: python convert-essbase-to-column.py -outline <Essbase XML Outline> -data <Data Extract>
+ -o, --outline   Essbase XML Outline (required)
+ -d, --data   Data Extract File (required)
 Flags:
  -h             This Help
- -v, --verbose  Creates source.txt and target.txt files
 '''
     if exception:
         print exception
@@ -120,5 +140,5 @@ Flags:
         sys.exit()
 
 if __name__ == '__main__':
-    #transform(r'test-data\aso-essbase-outline.xml', r'test-data\aso-essbase-extract.txt')
+    #transform(r'test-data\aso-essbase-outline.xml', r'test-data\aso-essbase-extract-2.txt', '')
     main(sys.argv[1:])
