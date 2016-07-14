@@ -52,14 +52,13 @@ class Essbase(object):
 	def stop(self):
 		self.cube.stop()
 		
-	def calculate(self, script=None, syntaxCheckOnly=False):
+	def calculate(self, script=None, dynamic=False, syntaxCheckOnly=False):
 		if script == None:
 			return False
-		#Less than 30 characters lets assume its a physical script
-		elif len(script) < 30:
-			self.cube.calculate(syntaxCheckOnly, script)
-			return True
-		#Everything else is a dynamic script so run it
-		else:
+		
+		if dynamic:
 			self.cube.calculate(script, syntaxCheckOnly)
+			return True
+		else:
+			self.cube.calculate(syntaxCheckOnly, script)
 			return True
